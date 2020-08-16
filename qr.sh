@@ -10,11 +10,11 @@ if [[ $1 == "create" ]]; then
                esac
           done
      fi
-     echo Creating base64...
-     mkdir $2_base64
-     base64 $2 > $2_base64/$2
+     echo Creating ascii85...
+     mkdir $2_ascii85
+     ascii85 $2 > $2_ascii85/$2
      echo Creating split...
-     cd $2_base64
+     cd $2_ascii85
      split -b 2953 -d $2 $2.
      rm -rf $2
      echo Creating QR...
@@ -24,7 +24,7 @@ if [[ $1 == "create" ]]; then
           rm -rf "$a"
      done
      cd ..
-     mv $2_base64 $2_qr
+     mv $2_ascii85 $2_qr
 elif [[ $1 == "convert" ]]; then
      if [ -d $2_cqr ]; then
           while true; do
@@ -45,15 +45,15 @@ elif [[ $1 == "convert" ]]; then
      done
      echo Connetcing files...
      cd ../${2}_cqr
-     cat * > ../${2}_base64.txt
-     sed -r 's/^QR-Code://' ../${2}_base64.txt > ../${2}_sbase64.txt
+     cat * > ../${2}_ascii85.txt
+     sed -r 's/^QR-Code://' ../${2}_ascii85.txt > ../${2}_sascii85.txt
      cd ..
-     echo Decoding base64...
-     base64 -d ${2}_sbase64.txt > $2_converted
+     echo Decoding ascii85...
+     ascii85 -d ${2}_sascii85.txt > $2_converted
      echo Removing working dir and files...
      rm -rf ${2}_cqr
-     rm -rf ${2}_base64.txt
-     rm -rf ${2}_sbase64.txt
+     rm -rf ${2}_ascii85.txt
+     rm -rf ${2}_sascii85.txt
 
 else
      echo Unkown  parametr

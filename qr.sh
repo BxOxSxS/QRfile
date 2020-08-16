@@ -41,17 +41,19 @@ elif [[ $1 == "convert" ]]; then
      cd $2
      for a in ${a}*.png
      do
-          zbarimg  -q $a | sed -r 's/^QR-Code://' > ../${2}_cqr/${a}.txt
+          zbarimg  -q $a > ../${2}_cqr/${a}.txt
      done
      echo Connetcing files...
      cd ../${2}_cqr
      cat * > ../${2}_base64.txt
+     sed -r 's/^QR-Code://' ../${2}_base64.txt > ../${2}_sbase64.txt
      cd ..
      echo Decoding base64...
-     base64 -d ${2}_base64.txt > $2_converted
+     base64 -d ${2}_sbase64.txt > $2_converted
      echo Removing working dir and files...
      rm -rf ${2}_cqr
      rm -rf ${2}_base64.txt
+     rm -rf ${2}_sbase64.txt
 
 else
      echo Unkown  parametr

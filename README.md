@@ -1,6 +1,7 @@
 # Any file to QR
 This is script that can convert any file to splited QR codes
 
+**Try also another branch [base64](https://github.com/BxOxSxS/Any-file-to-QR/tree/base64) witch uses more common encode**
 ## How it works
 * Encode:
      1. Converts file to ascii85 text file

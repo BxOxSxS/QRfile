@@ -12,13 +12,13 @@ if [[ $1 == "create" ]]; then
      fi
      echo Creating base64...
      mkdir $2_base64
-     base64 $2 > $2_base64/$2_base64.txt
+     base64 $2 > $2_base64/$2
      echo Creating split...
      cd $2_base64
-     split -b 2953 -d $2_base64.txt $2_base64.txt.
-     rm -rf $2_base64.txt
+     split -b 2953 -d $2 $2.
+     rm -rf $2
      echo Creating QR...
-     for a in $2_base64.txt.*
+     for a in $2.*
      do
           qrencode  -8 -d 10 -m 1 -o $a.png < $a
           rm -rf "$a"

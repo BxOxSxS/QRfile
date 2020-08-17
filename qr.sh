@@ -1,5 +1,10 @@
 #!/bin/bash
 if [[ $1 == "create" ]]; then
+     if [ ! -f $2 ]; then
+          echo File \"$2\" does not exists!
+          exit 1
+     fi
+
      if [ -d $2_qr ]; then
           while true; do
                read -p "Dir \"$2_qr\" already exist remove it? Y/N " yn
@@ -26,6 +31,11 @@ if [[ $1 == "create" ]]; then
      cd ..
      mv $2_ascii85 $2_qr
 elif [[ $1 == "convert" ]]; then
+     if [ ! -d $2 ]; then
+          echo Dir \"$2\" does not exists!
+          exit 1
+     fi
+
      if [ -d $2_cqr ]; then
           while true; do
                read -p "Dir \"$2_cqr\" already exist remove it? Y/N " yn

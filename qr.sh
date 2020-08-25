@@ -22,11 +22,16 @@ if [[ $1 == "create" ]]; then
      cd $2_ascii85
      split -b 2953 -d $2 $2.
      rm -rf $2
+     files=$(ls | wc -l)
+     echo Created $files files
      echo Creating QR...
+     n=1
      for a in $2.*
      do
           qrencode  -8 -d 10 -m 1 -o $a.png < $a
           rm -rf "$a"
+          printf "\r$n/$files"
+          ((n++))
      done
      cd ..
      mv $2_ascii85 $2_qr
@@ -49,9 +54,14 @@ elif [[ $1 == "convert" ]]; then
      echo Converting QR...
      mkdir ${2}_cqr
      cd $2
+     files=$(ls *.png | wc -l)
+     echo Finded $files files
+     n=1
      for a in ${a}*.png
      do
           zbarimg  -q $a > ../${2}_cqr/${a}.txt
+          printf "\r$n/$files"
+          ((n++))
      done
      echo Connetcing files...
      cd ../${2}_cqr

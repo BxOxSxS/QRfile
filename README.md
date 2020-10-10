@@ -15,7 +15,7 @@ This is script that can convert any file to splited QR codes
 ## Requirement
 * bash
 * ascii85
-* split (from [GNU Coreutils](https://www.gnu.org/software/coreutils/))
+* [GNU Coreutils](https://www.gnu.org/software/coreutils/)
 * [qrencode](https://github.com/fukuchi/libqrencode) (for encode QR)
 * [zbar](https://github.com/mchehab/zbar) (also know as zbar-tools) (for decode QR)
 

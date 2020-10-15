@@ -1,11 +1,19 @@
 #!/bin/bash
 if [[ $1 == "create" ]]; then
-     if [ ! -f "$2" ]; then
-          echo File \"$2\" does not exists!
+     if [ $2 == -b ]; then
+          cipher=base64
+          path="$3"
+     else
+          cipher=ascii85
+          path="$2"
+     fi
+     if [ ! -f "$path" ]; then
+          echo File \"$path\" does not exists!
           exit 1
      fi
-     file="$(basename "$2")"
-     cp -f "$2" "${file}_work"
+
+     file="$(basename "$path")"
+     cp -f "$path" "${file}_work"
 
      if [ -d "${file}_qr" ]; then
           while true; do
@@ -17,11 +25,11 @@ if [[ $1 == "create" ]]; then
                esac
           done
      fi
-     echo Creating ascii85...
-     mkdir "${file}_ascii85"
-     ascii85 "${file}_work" > "${file}_ascii85"/"$file"
+     echo Creating ${cipher}...
+     mkdir "${file}_${cipher}"
+     ${cipher} "${file}_work" > "${file}_${cipher}"/"$file"
      echo Creating split...
-     cd "${file}_ascii85"
+     cd "${file}_${cipher}"
      split -b 2953 -d "$file" "$file."
      rm -rf "$file"
      files=$(ls | wc -l)
@@ -35,12 +43,13 @@ if [[ $1 == "create" ]]; then
           printf "\r$n/$files"
           ((n++))
      done
+     echo > ${cipher}
      cd ..
-     mv "${file}_ascii85" "${file}_qr"
+     mv "${file}_${cipher}" "${file}_qr"
      rm "${file}_work"
 elif [[ $1 == "convert" ]]; then
-     if [ ! -d $file ]; then
-          echo Dir \"$file\" does not exists!
+     if [ ! -d $2 ]; then
+          echo Dir \"$2\" does not exists!
           exit 1
      fi
      dir="$(basename "$2")"
@@ -58,6 +67,18 @@ elif [[ $1 == "convert" ]]; then
      echo Converting QR...
      mkdir "${dir}_cqr"
      cd "${dir}_work"
+     if [ -f "ascii85" ]; then
+          cipher=ascii85
+     elif [ -f base64 ]; then
+          cipher=base64
+     else
+          echo "Cannot figure out what cipher is! Create a file in the dir with the name of a supported cipher"
+          cd ..
+          rm -rf "${dir}_cqr"
+          rm -rf "${dir}_work"
+          exit 1
+     fi
+
      files=$(ls *.png | wc -l)
      echo Finded $files files
      n=1
@@ -69,15 +90,15 @@ elif [[ $1 == "convert" ]]; then
      done
      echo Connetcing files...
      cd "../${dir}_cqr"
-     cat * > "../${dir}_ascii85.txt"
-     sed -r 's/^QR-Code://' "../${dir}_ascii85.txt" > "../${dir}_sascii85.txt"
+     cat * > "../${dir}_${cipher}.txt"
+     sed -r 's/^QR-Code://' "../${dir}_${cipher}.txt" > "../${dir}_s${cipher}.txt"
      cd ..
-     echo Decoding ascii85...
-     ascii85 -d "${dir}_sascii85.txt" > "${dir}_converted"
+     echo Decoding ${cipher}...
+     ${cipher} -d "${dir}_s${cipher}.txt" > "${dir}_converted"
      echo Removing working dir and files...
      rm -rf "${dir}_cqr"
-     rm -rf "${dir}_ascii85.txt"
-     rm -rf "${dir}_sascii85.txt"
+     rm -rf "${dir}_${cipher}.txt"
+     rm -rf "${dir}_s${cipher}.txt"
      rm -rf "${dir}_work"
 
 else

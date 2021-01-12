@@ -25,7 +25,20 @@ Script have two parametrs
 * `create [file]` it will create QR codes into [file]_qr add `-b`, `--base` or `--base64` before file to use base64
 * `convert [qr codes dir]` it will convert file from QR codes in the given dir to `[file]_converted` **Warning! Script will try to convert all `.png` files from that dir so make sure it only has appropriate files**
 
-Example of usage: `bash qr.sh create file.zip`, `bash qr.sh create -b file.zip`,`bash qr.sh convert file.zip_qr`
+Example of usage: `bash qrfile create file.zip`, `bash qrfile create -b file.zip`,`bash qrfile convert file.zip_qr`
+
+## Instalation
+QRfile is bash script so you can just download it and run but I have created `makefile` so you can easily install and uninstall it and run in every path
+
+```
+git clone https://github.com/BxOxSxS/QRfile
+cd QRfile
+sudo make install
+```
+To uninstall:
+```
+sudo make uninstall
+```
 
 ## But Why?
 I really don't know. The process takes an unprofitable amount of memory and time:

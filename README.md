@@ -16,12 +16,13 @@ Bash script that can convert any file to splitted QR codes and vice versa
 * ascii85
 * base64
 * [GNU Coreutils](https://www.gnu.org/software/coreutils/)
+* [GNU Sed](https://www.gnu.org/software/sed/)
 * [qrencode](https://github.com/fukuchi/libqrencode) (for encode QR)
 * [zbar](https://github.com/mchehab/zbar) (also know as zbar-tools) (for decode QR)
 
 ## How to use
 Script have two parametrs
-* `create [file]` it will create QR codes into [file]_qr add `-b` before file to use base64
+* `create [file]` it will create QR codes into [file]_qr add `-b`, `--base` or `--base64` before file to use base64
 * `convert [qr codes dir]` it will convert file from QR codes in the given dir to `[file]_converted` **Warning! Script will try to convert all `.png` files from that dir so make sure it only has appropriate files**
 
 Example of usage: `bash qr.sh create file.zip`, `bash qr.sh create -b file.zip`,`bash qr.sh convert file.zip_qr`

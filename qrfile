@@ -1,11 +1,27 @@
 #!/bin/bash
+if ! [ -x "$(command -v split)" ]; then
+  echo Error: split is not installed
+  exit 1
+fi
+
 if [[ $1 == "create" ]]; then
-     if [ $2 == -b ]; then
+     if [ $2 == -b ] || [ $2 == --base64 ] || [ $2 == --base ]; then
           cipher=base64
+          path="$3"
+     elif [ $2 == -a ] || [ $2 == --ascii85 ] || [ $2 == --ascii ]; then
+          cipher=ascii85
           path="$3"
      else
           cipher=ascii85
           path="$2"
+     fi
+     if ! [ -x "$(command -v qrencode)" ]; then
+       echo Error: qrencode is not installed
+       exit 1
+     fi
+     if ! [ -x "$(command -v $cipher)" ]; then
+       echo Error: $cipher is not installed, please install it fror your system
+       exit 1
      fi
      if [ ! -f "$path" ]; then
           echo File \"$path\" does not exists!
@@ -79,6 +95,14 @@ elif [[ $1 == "convert" ]]; then
           exit 1
      fi
 
+     if ! [ -x "$(command -v zbarimg)" ]; then
+       echo Error: zbar is not installed
+       exit 1
+     fi
+     if ! [ -x "$(command -v $cipher)" ]; then
+       echo Error: $cipher is not installed, please install it fror your system
+       exit 1
+     fi
      files=$(ls *.png | wc -l)
      echo Finded $files files
      n=1

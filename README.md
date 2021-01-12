@@ -1,5 +1,5 @@
-# Any file to QR
-This is script that can convert any file to splited QR codes
+# QRfile - Any file to QR
+Bash script that can convert any file to splitted QR codes and vice versa
 
 ## How it works
 * Encode:

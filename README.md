@@ -6,6 +6,7 @@ Bash script that can convert any file to splitted QR codes and vice versa
      1. Converts file to ascii85 or base64 text file
      2. Splits text file to many files with the maximum size of QR code (2953 bytes)
      3. Creates QR code from each file
+     4. Creates QR code with info about file
 * Decode
      1. Converts QR to splitted text files
      2. Connects files into one
@@ -13,19 +14,31 @@ Bash script that can convert any file to splitted QR codes and vice versa
 
 ## Requirement
 * bash
-* ascii85
-* base64
+* ascii85 and/or base64
 * [GNU Coreutils](https://www.gnu.org/software/coreutils/)
 * [GNU Sed](https://www.gnu.org/software/sed/)
 * [qrencode](https://github.com/fukuchi/libqrencode) (for encode QR)
 * [zbar](https://github.com/mchehab/zbar) (also know as zbar-tools) (for decode QR)
+* sha512sum and/or sha256sum for checking hash sum (optional)
 
 ## How to use
-Script have two parametrs
-* `create [file]` it will create QR codes into [file]_qr add `-b`, `--base` or `--base64` before file to use base64
-* `convert [qr codes dir]` it will convert file from QR codes in the given dir to `[file]_converted` **Warning! Script will try to convert all `.png` files from that dir so make sure it only has appropriate files**
+Script always have two required parametrs
+* `create [options] [file]` it will create QR codes into qr_[filename] add
 
-Example of usage: `bash qrfile create file.zip`, `bash qrfile create -b file.zip`,`bash qrfile convert file.zip_qr`
+  Options:
+  * `-a`, `--ascii` or `--ascii85` before file to use ascii85 (default)
+  * `-b`, `--base` or `--base64` before file to use base64
+  * `-256`, `--sha256` before file to attach sha256 sum to QR
+  * `-512`, `--sha512` before file to attach sha512 sum to QR
+
+
+* `convert [qr codes dir]` it will convert file from QR codes in the given dir to `[file]_converted`
+
+  **Warning! Script will try to convert all `.png` files from that dir so make sure it only has appropriate files**
+
+Example of usage: `bash qrfile create file.zip`, `bash qrfile create -b -512 file.zip`,`bash qrfile convert file.zip_qr`
+
+**Warning!** script creates info QR png with required info (such as name, cipher and hash) and it need to have name`*info.png` to property decode QR files and check hash sum
 
 ## Instalation
 QRfile is bash script so you can just download it and run but I have created `makefile` so you can easily install and uninstall it and run in every path

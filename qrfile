@@ -1,19 +1,16 @@
 #!/bin/bash
-if ! [ -x "$(command -v split)" ]; then
-  echo Error: split is not installed
-  exit 1
-fi
-
-if [[ $1 == "create" ]]; then
-     if [ $2 == -b ] || [ $2 == --base64 ] || [ $2 == --base ]; then
+if [[ $@ == *"create"* ]]; then
+     if [[ $@ == *"-b"* ]] || [[ $@ == *"--base64"* ]] || [[ $@ == *"--base"* ]]; then
           cipher=base64
-          path="$3"
-     elif [ $2 == -a ] || [ $2 == --ascii85 ] || [ $2 == --ascii ]; then
+     elif [[ $@ == *"-a"* ]] || [[ $@ == *"--ascii85"* ]] || [[ $@ == *"--ascii"* ]]; then
           cipher=ascii85
-          path="$3"
      else
           cipher=ascii85
-          path="$2"
+     fi
+
+     if ! [ -x "$(command -v split)" ]; then
+       echo Error: split is not installed
+       exit 1
      fi
      if ! [ -x "$(command -v qrencode)" ]; then
        echo Error: qrencode is not installed
@@ -23,6 +20,8 @@ if [[ $1 == "create" ]]; then
        echo Error: $cipher is not installed, please install it fror your system
        exit 1
      fi
+
+     for path; do true; done
      if [ ! -f "$path" ]; then
           echo File \"$path\" does not exists!
           exit 1
@@ -31,26 +30,27 @@ if [[ $1 == "create" ]]; then
      file="$(basename "$path")"
      cp -f "$path" "${file}_work"
 
-     if [ -d "${file}_qr" ]; then
+     if [ -d "qr_${file}" ]; then
           while true; do
-               read -p "Dir \"${file}_qr\" already exist remove it? Y/N " yn
+               read -p "Dir \"qr_${file}\" already exist remove it? Y/N " yn
                case $yn in
-                    [Yy]* ) rm -rf "${file}_qr"; break;;
+                    [Yy]* ) rm -rf "qr_${file}"; break;;
                     [Nn]* ) exit 130;;
                     * ) echo "Please answer Y or N.";;
                esac
           done
      fi
-     echo Creating ${cipher}...
+     printf "Creating ${cipher}... "
      mkdir "${file}_${cipher}"
-     ${cipher} "${file}_work" > "${file}_${cipher}"/"$file"
-     echo Creating split...
+     ${cipher} -w 0 "${file}_work" > "${file}_${cipher}"/"$file"
+     printf "Done\n"
+     printf "Creating split... "
      cd "${file}_${cipher}"
      split -b 2953 -d "$file" "$file."
      rm -rf "$file"
      files=$(ls | wc -l)
-     echo Created $files files
-     echo Creating QR...
+     printf "Done: Created $files files\n"
+     printf "Creating QR...\n"
      n=1
      for a in "$file".*
      do
@@ -59,9 +59,32 @@ if [[ $1 == "create" ]]; then
           printf "\r$n/$files"
           ((n++))
      done
-     echo > ${cipher}
+     printf " Done\n"
+     echo name=${file} > ${file}_info.txt
+     echo cipher=$cipher >> ${file}_info.txt
+     if [[ $@ == *"-256"* ]] || [[ $@ == *"--sha256"* ]]; then
+          hash=sha256
+     elif [[ $@ == *"-512"* ]] || [[ $@ == *"--sha512"* ]]; then
+          hash=sha512
+     else
+          qrencode  -8 -d 10 -m 1 -o ${file}_info.png < ${file}_info.txt
+          rm "${file}_info.txt"
+          cd ..
+          mv "${file}_${cipher}" "qr_${file}"
+          rm "${file}_work"
+          exit 0
+     fi
+     if ! [ -x "$(command -v ${hash}sum)" ]; then
+       echo Error: ${hash}sum is not installed, skipping hashing...
+
+     else
+          echo hashcipher=$hash >> ${file}_info.txt
+          echo hash=$(${hash}sum ../$file | cut -d " " -f 1 ) >> ${file}_info.txt
+     fi
+     qrencode  -8 -d 10 -m 1 -o ${file}_info.png < ${file}_info.txt
+     rm "${file}_info.txt"
      cd ..
-     mv "${file}_${cipher}" "${file}_qr"
+     mv "${file}_${cipher}" "qr_${file}"
      rm "${file}_work"
 elif [[ $1 == "convert" ]]; then
      if [ ! -d $2 ]; then
@@ -80,31 +103,40 @@ elif [[ $1 == "convert" ]]; then
                esac
           done
      fi
-     echo Converting QR...
-     mkdir "${dir}_cqr"
-     cd "${dir}_work"
-     if [ -f "ascii85" ]; then
-          cipher=ascii85
-     elif [ -f base64 ]; then
-          cipher=base64
-     else
-          echo "Cannot figure out what cipher is! Create a file in the dir with the name of a supported cipher"
-          cd ..
-          rm -rf "${dir}_cqr"
-          rm -rf "${dir}_work"
-          exit 1
-     fi
-
+     printf "Converting QR... "
      if ! [ -x "$(command -v zbarimg)" ]; then
        echo Error: zbar is not installed
        exit 1
      fi
+     mkdir "${dir}_cqr"
+     cd "${dir}_work"
+     if [ -f "ascii85" ]; then
+          cipher=ascii85
+          name=$dir
+     elif [ -f base64 ]; then
+          cipher=base64
+          name=$dir
+     else
+          if compgen -G "*info.png" > /dev/null; then
+               zbarimg -q *info.png > d_info.txt
+               rm *_info.png
+               sed -r 's/^QR-Code://' d_info.txt > info.txt
+               rm d_info.txt
+               source info.txt
+          else
+               echo There is no info.png file or cipher name file. Please create one and try again
+               rm -rf "../${dir}_cqr"
+               rm -rf "../${dir}_work"
+               exit 1
+          fi
+     fi
+
      if ! [ -x "$(command -v $cipher)" ]; then
        echo Error: $cipher is not installed, please install it fror your system
        exit 1
      fi
      files=$(ls *.png | wc -l)
-     echo Finded $files files
+     printf "Finded $files files\n"
      n=1
      for a in ${a}*.png
      do
@@ -112,18 +144,37 @@ elif [[ $1 == "convert" ]]; then
           printf "\r$n/$files"
           ((n++))
      done
-     echo Connetcing files...
+     printf " Done\n"
+     printf "Connecting files... "
      cd "../${dir}_cqr"
-     cat * > "../${dir}_${cipher}.txt"
-     sed -r 's/^QR-Code://' "../${dir}_${cipher}.txt" > "../${dir}_s${cipher}.txt"
+     cat * > "../${name}_${cipher}.txt"
+     sed -r 's/^QR-Code://' "../${name}_${cipher}.txt" > "../${name}_s${cipher}.txt"
      cd ..
-     echo Decoding ${cipher}...
-     ${cipher} -d "${dir}_s${cipher}.txt" > "${dir}_converted"
-     echo Removing working dir and files...
+     printf "Done\n"
+     printf "Decoding ${cipher}... "
+     ${cipher} -d "${name}_s${cipher}.txt" > "converted_${name}"
+     printf "Done\n"
+
+     if [ -z ${hashcipher+x} ]; then
+          echo No hash sum, skipping...
+     else
+          printf "Checking ${hashcipher}sum... "
+          if ! [ -x "$(command -v ${hashcipher}sum)" ]; then
+            echo Error: ${hashcipher}sum is not installed, skipping hashing...
+          else
+               if [[ $(${hashcipher}sum converted_${name} | cut -d " " -f 1 ) == $hash ]]; then
+                    echo Hash sum equal
+               else
+                    echo Warning: Hash sume does not equal!
+               fi
+          fi
+     fi
+     printf "Removing working dir and files... "
      rm -rf "${dir}_cqr"
-     rm -rf "${dir}_${cipher}.txt"
-     rm -rf "${dir}_s${cipher}.txt"
+     rm -rf "${name}_${cipher}.txt"
+     rm -rf "${name}_s${cipher}.txt"
      rm -rf "${dir}_work"
+     printf "Done\n"
 
 else
      echo Unkown  parametr

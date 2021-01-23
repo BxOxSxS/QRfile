@@ -1,4 +1,13 @@
 #!/bin/bash
+function ProgressBar {
+	let progress=(${1}*100/${2}*100)/100
+	let done=(${progress}*4)/10
+	let left=40-$done
+	done=$(printf "%${done}s")
+	left=$(printf "%${left}s")
+     printf "\r[${done// /#}${left// /-}] ${progress}%% | ${1}/${2}"
+}
+
 if [[ $@ == *"create"* ]]; then
      if [[ $@ == *"-b"* ]] || [[ $@ == *"--base64"* ]] || [[ $@ == *"--base"* ]]; then
           cipher=base64
@@ -56,10 +65,11 @@ if [[ $@ == *"create"* ]]; then
      do
           qrencode  -8 -d 10 -m 1 -o $a.png < $a
           rm -rf "$a"
-          printf "\r$n/$files"
+          ProgressBar $n $files
           ((n++))
      done
      printf " Done\n"
+     printf "Creating info file..."
      echo name=${file} > ${file}_info.txt
      echo cipher=$cipher >> ${file}_info.txt
      if [[ $@ == *"-256"* ]] || [[ $@ == *"--sha256"* ]]; then
@@ -86,6 +96,7 @@ if [[ $@ == *"create"* ]]; then
      cd ..
      mv "${file}_${cipher}" "qr_${file}"
      rm "${file}_work"
+     printf " Done\n"
 elif [[ $1 == "convert" ]]; then
      if [ ! -d $2 ]; then
           echo Dir \"$2\" does not exists!
@@ -141,7 +152,7 @@ elif [[ $1 == "convert" ]]; then
      for a in ${a}*.png
      do
           zbarimg  -q $a > "../${dir}_cqr/${a}.txt"
-          printf "\r$n/$files"
+          ProgressBar $n $files
           ((n++))
      done
      printf " Done\n"

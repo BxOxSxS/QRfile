@@ -30,6 +30,7 @@ Script always have two required parametrs
   * `-b`, `--base` or `--base64` before file to use base64
   * `-256`, `--sha256` before file to attach sha256 sum to QR
   * `-512`, `--sha512` before file to attach sha512 sum to QR
+  * `-t`, `--test` before file to test dir after creating QR codes
 
 
 * `convert [qr codes dir]` it will convert file from QR codes in the given dir to `[file]_converted`

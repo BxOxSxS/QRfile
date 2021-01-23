@@ -82,6 +82,11 @@ if [[ $@ == *"create"* ]]; then
           cd ..
           mv "${file}_${cipher}" "qr_${file}"
           rm "${file}_work"
+          printf " Done\n"
+          if [[ $@ == *"-t"* ]] || [[ $@ == *"--test"* ]]; then
+               bash qrfile convert qr_${file}
+			rm -rf converted_${file}
+          fi
           exit 0
      fi
      if ! [ -x "$(command -v ${hash}sum)" ]; then
@@ -97,6 +102,10 @@ if [[ $@ == *"create"* ]]; then
      mv "${file}_${cipher}" "qr_${file}"
      rm "${file}_work"
      printf " Done\n"
+     if [[ $@ == *"-t"* ]] || [[ $@ == *"--test"* ]]; then
+          bash qrfile convert qr_${file}
+		rm -rf converted_${file}
+     fi
 elif [[ $1 == "convert" ]]; then
      if [ ! -d $2 ]; then
           echo Dir \"$2\" does not exists!
@@ -177,6 +186,7 @@ elif [[ $1 == "convert" ]]; then
                     echo Hash sum equal
                else
                     echo Warning: Hash sume does not equal!
+				exitcode=1
                fi
           fi
      fi
@@ -186,6 +196,7 @@ elif [[ $1 == "convert" ]]; then
      rm -rf "${name}_s${cipher}.txt"
      rm -rf "${dir}_work"
      printf "Done\n"
+	exit $exitcode
 
 else
      echo Unkown  parametr

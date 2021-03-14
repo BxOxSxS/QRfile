@@ -14,7 +14,7 @@ Bash script that can convert any file to splitted QR codes and vice versa
 
 ## Requirement
 * bash
-* ascii85 and/or base64
+* [ascii85](https://github.com/datawraith/ascii85gem) (optional)
 * [GNU Coreutils](https://www.gnu.org/software/coreutils/)
 * [GNU Sed](https://www.gnu.org/software/sed/)
 * [qrencode](https://github.com/fukuchi/libqrencode) (for encode QR)

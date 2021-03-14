@@ -82,11 +82,11 @@ if [[ $@ == *"create"* ]]; then
           hash=sha512
      else
           qrencode  -8 -d 10 -m 1 -o "${file}_info.png" < "${file}_info.txt"
-          rm "${file}_info.txt"
+		printf " Done\n"
           cd ..
+		cat "${file}_info.txt"
           mv "${file}_${cipher}" "qr_${file}"
           rm "${file}_work"
-          printf " Done\n"
           if [[ $@ == *"-t"* ]] || [[ $@ == *"--test"* ]]; then
                bash qrfile convert "qr_${file}"
 			rm -rf "converted_${file}"
@@ -102,12 +102,12 @@ if [[ $@ == *"create"* ]]; then
           echo hash=$(${hash}sum "../$file" | cut -d " " -f 1 ) >> "${file}_info.txt"
      fi
 
-     qrencode  -8 -d 10 -m 1 -o "${file}_info.png" < "${file}_info.txt"
-     rm "${file}_info.txt"
+	qrencode  -8 -d 10 -m 1 -o "${file}_info.png" < "${file}_info.txt"
+	printf " Done\n"
+	cat "${file}_info.txt"
      cd ..
      mv "${file}_${cipher}" "qr_${file}"
      rm "${file}_work"
-     printf " Done\n"
 
      if [[ $@ == *"-t"* ]] || [[ $@ == *"--test"* ]]; then
           bash qrfile convert "qr_${file}"
